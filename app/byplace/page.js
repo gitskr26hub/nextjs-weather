@@ -45,7 +45,7 @@ const page = () => {
     });
     setList(updatelist);
   }, [data?.cod == 200]);
-  console.log(list);
+//  console.log(list);
 
   useEffect(() => {
     window.onclick = (event) => {
