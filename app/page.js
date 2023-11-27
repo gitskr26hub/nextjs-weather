@@ -80,7 +80,7 @@ export default function Home() {
             // Notification.requestPermission()
           } else {
             navigator.geolocation.watchPosition(async (position) => {
-              console.log(position.coords.latitude, position.coords.longitude);
+             // console.log(position.coords.latitude, position.coords.longitude);
               const res = await GETBYLOCATION(
                 position.coords.latitude,
                 position.coords.longitude
