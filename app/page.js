@@ -212,10 +212,10 @@ export default function Home() {
                         <td className="px-6 py-4 ">
                           {data.daily.sunset[i]?.split("T")[1]} PM
                         </td>
-                        <td className="px-6 py-4 text-red-400">
+                        <td className="px-6 py-4 text-red-500">
                           {data?.daily?.temperature_2m_max[i]} °C
                         </td>
-                        <td className="px-6 py-4 text-green-300">
+                        <td className="px-6 py-4 text-green-500">
                           {data?.daily?.temperature_2m_min[i]} °C
                         </td>
                       </tr>
