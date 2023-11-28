@@ -1,28 +1,43 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef,Suspense,useState,useContext } from "react";
 import { GETBYPlace } from "./api/route";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Swal from "sweetalert2";
 import { IoMdCloseCircle } from "react-icons/io";
+import  Loading  from "./loading";
+import {monthNames,dayNames,monthNamesHi,dayNamesHi} from "@/components/MonthDay"
+import {Lang_data} from "../../context/context"
+
 
 const page = () => {
-  const [city, setcity] = React.useState("");
-  const [Lang, setLang] = React.useState("en");
-  const [data, setData] = React.useState();
-  const [list, setList] = React.useState([]);
-  const [openModal, setOpenModal] = React.useState(false);
-  const [modaldata, setModaldata] = React.useState({});
+  const [city, setcity] = useState("");
+  const [Lang, setLang] = useState("");
+  const [data, setData] = useState();
+  const [list, setList] = useState([]);
+  const [openModal, setOpenModal] = useState(false);
+  const [modaldata, setModaldata] = useState({});
+  const [loading, setLoading] = useState(false);
   const boxref = useRef(null);
+  const {Language}=useContext(Lang_data)
+ 
+  useEffect(()=>{
+    // console.log(Language)
+    setLang(Language)
+  },[Language])
+
 
   async function Search() {
-    setData()
+    setData();
+    setLoading(true);
     if (city && Lang) {
       setData(await GETBYPlace(city, Lang));
+      setLoading(false)
     } else {
       Swal.fire({
         title: "Please Enter city!",
       });
+      setLoading(false)
     }
   }
 
@@ -45,7 +60,7 @@ const page = () => {
     });
     setList(updatelist);
   }, [data?.cod == 200]);
-//  console.log(list);
+  // console.log(list);
 
   useEffect(() => {
     window.onclick = (event) => {
@@ -53,19 +68,21 @@ const page = () => {
         && event.target !== boxref.current) {     
         // console.log(`You clicked Outside the box!`);
         setOpenModal(false)
-      } else {     
-       
-        // console.log(`You clicked Inside the box!`);
       }
     }
 }, []);
 
-
+function handleKeyPress(e) {
+  if(e.key=="Enter" && city){
+    Search()
+  }
+  
+}
 
 
   return (
     <main className="min-h-screen items-center justify-between p-8 bg-gradient-to-t from-blue-100 
-    via-blue-300 to-blue-500">
+    via-blue-300 to-blue-500" >
       <div
         className="bg-[url('/badal.gif')] w-[95%] m-auto items-center justify-center flex flex-col  p-5 rounded-lg  shadow-xl border-2 border-2-gray">
         <input
@@ -74,16 +91,25 @@ const page = () => {
           onChange={(e) => setcity(e.target.value)}
           placeholder="Enter city name here ....."
           className="bg-opacity-5 border border-blue-300  text-md rounded-lg text-black  block w-[90%] md:w-[30%] p-2.5  "
+          onKeyUp={(e)=>handleKeyPress(e)}
         />
+       
         <button
           className="button-29 bg-slate-300 mt-3"
           onClick={() => Search()}>
           Submit
         </button>
+
+
+        {list?.length==0 && loading && <div className="pt-10"> <Loading /></div>}
+
+
+
+        <Suspense fallback={<Loading/>}>
         <div className="text-white">
           {data?.cod == 200 && (
             <div>
-              <p className="text-center">CURRENT WEATHER</p>
+              <p className="text-center">{Lang=="en"?"CURRENT WEATHER":"वर्तमान मौसम"}</p>
               <div className="text-center">
                 <div>City : {data?.city?.name}</div>
                 <div>country : {data?.city?.country}</div>
@@ -95,8 +121,8 @@ const page = () => {
                   const specificDate = new Date(item.date);
                   const monthIndex = specificDate.getMonth();
                   const dayIndex = specificDate.getDay();
-                  const currentMonth = monthNames[monthIndex];
-                  const currentDay = dayNames[dayIndex];
+                  const currentMonth =Lang==="en"? monthNames[monthIndex]:monthNamesHi[monthIndex];
+                  const currentDay = Lang==="en"?dayNames[dayIndex]:dayNamesHi[dayIndex];
                   return (
                     <motion.div
                       initial={{ x: i % 2 == 0 ? "100%" : "-100%" }}
@@ -152,10 +178,11 @@ const page = () => {
                                 height="60"
                                 className="ml-[25%]"
                               />
-                              <p>Time : {pro.dt_txt.split(" ")[1]}</p>
-                              <p>Temp : {pro.main.temp} °C</p>
+                              <p>{Lang=="en"?"Time":"समय"} : {pro.dt_txt.split(" ")[1]}</p>
+                              <p>{Lang=="en"?"Temp":"तापमान"} : {pro.main.temp} °C</p>
                               <a className="underline text-xs text-orange-400 ">
-                                Details
+                              {Lang=="en"?"Details":"विवरण"}
+
                               </a>
                             </motion.div>
                           );
@@ -270,31 +297,31 @@ const page = () => {
                         <div className="lg:my-3 bg-gray-800 text-white p-8 lg:rounded-r-lg w-full">
                           <div className="flex justify-between  mb-4 w-full">
                             <div className="w-auto font-bold uppercase text-90">
-                              Max Temp
+                            {Lang=="en"?"Max Temp":"अधिकतम तापमान"}
                             </div>
                             <div className="w-auto text-right">{modaldata.temp_max}ºC </div>
                           </div>
                           <div className="flex justify-between  mb-4 w-full">
                             <div className="w-auto font-bold uppercase text-90">
-                              Min Temp
+                            {Lang=="en"?"Min Temp":"न्यूनतम  तापमान"}
                             </div>
                             <div className="w-auto text-right">{modaldata.temp_min}ºC </div>
                           </div>
                           <div className="flex justify-between  mb-4 w-full">
                             <div className="w-auto font-bold uppercase text-90">
-                              Humidity
+                            {Lang=="en"?"Humidity":"नमी"}
                             </div>
                             <div className="w-auto text-right">{modaldata.humidity} %</div>
                           </div>
                           <div className="flex justify-between  mb-4 w-full">
                             <div className="w-auto items-center justify-center font-bold uppercase text-90 flex">
-                              Wind <Image src={'/assets/icons/50d.png'} width='25' height='25' alt='air'/>
+                            {Lang=="en"?"Wind":"हवा"} <Image src={'/assets/icons/50d.png'} width='25' height='25' alt='air'/>
                             </div>
                             <div className="w-auto text-right">{modaldata.wind} km/h</div>
                           </div>
                           <div className="flex justify-between  mb-8 w-full">
                             <div className="w-auto items-center justify-center font-bold uppercase text-90 flex">
-                            Clouds<Image src={'/assets/icons/04d.png'} width='25' height='25' alt='air'/>
+                            {Lang=="en"? "Clouds":"बादल"}<Image src={'/assets/icons/04d.png'} width='25' height='25' alt='air'/>
                             </div>
                             <div className="w-auto text-right">{modaldata.clouds} %</div>
                           </div>
@@ -321,33 +348,10 @@ const page = () => {
             </>
           ) : null}
         </div>
+        </Suspense>
       </div>
     </main>
   );
 };
 
 export default page;
-
-const monthNames = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-const dayNames = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-];
